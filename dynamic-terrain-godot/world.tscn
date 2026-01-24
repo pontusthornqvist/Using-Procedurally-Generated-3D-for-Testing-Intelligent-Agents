@@ -1,0 +1,97 @@
+[gd_scene load_steps=19 format=3 uid="uid://dx24kivkye7qk"]
+
+[ext_resource type="Script" uid="uid://b0ltraws60kob" path="res://scripts/TerrainGenerator.gd" id="1_f3sb7"]
+[ext_resource type="Script" uid="uid://b0oy6rfx4uk6m" path="res://scripts/testRunner.gd" id="1_fj7yv"]
+[ext_resource type="Script" uid="uid://co35sdyc3dq72" path="res://flyCam.gd" id="3_aqk2v"]
+[ext_resource type="RDShaderFile" uid="uid://cms1q2ev5xc24" path="res://scripts/erosion.glsl" id="3_dwbse"]
+[ext_resource type="Script" uid="uid://ryg27kkjir3b" path="res://ChunkManager.gd" id="3_tlwt5"]
+[ext_resource type="RDShaderFile" uid="uid://c4tnh8xtvwhp1" path="res://scripts/mesh_gen.glsl" id="4_pkg7o"]
+[ext_resource type="ArrayMesh" uid="uid://dv1b475vsauqe" path="res://grass/grass2o.obj" id="7_gbfbk"]
+[ext_resource type="Shader" uid="uid://cwqofavx1dcii" path="res://grass/grass.gdshader" id="8_ioo17"]
+[ext_resource type="Texture2D" uid="uid://dvfjw6jgtnq6f" path="res://grass/homeMadeGrass.png" id="9_ioo17"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_f3sb7"]
+noise_type = 3
+frequency = 0.005
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_fj7yv"]
+noise_type = 3
+fractal_type = 3
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ioo17"]
+noise_type = 3
+fractal_type = 2
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ic0uy"]
+noise_type = 3
+frequency = 0.002
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_k3n1d"]
+frequency = 0.001
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_wse8f"]
+noise_type = 3
+frequency = 0.007
+fractal_type = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ic0uy"]
+noise = SubResource("FastNoiseLite_wse8f")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wse8f"]
+render_priority = 0
+shader = ExtResource("8_ioo17")
+shader_parameter/u_terrain_inverse_transform = Projection(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+shader_parameter/u_fray_strength = 0.5
+shader_parameter/u_thickness_boost = 0.1
+shader_parameter/global_wind_speed = 0.2
+shader_parameter/global_wind_direction = Vector2(1, 0.5)
+shader_parameter/global_wind_noise = SubResource("NoiseTexture2D_ic0uy")
+shader_parameter/wind_divergence_angle = 0.35
+shader_parameter/wind_scale = 0.05
+shader_parameter/wind_shadow_color = Color(0.4117647, 0.46666667, 0.62352943, 1)
+shader_parameter/wind_highlight_color = Color(0.60188675, 1.2943395, 0.46560755, 1)
+
+[sub_resource type="Environment" id="Environment_aqk2v"]
+background_mode = 1
+background_color = Color(0.64951944, 0.8184936, 0.8945044, 1)
+fog_light_color = Color(0.4021017, 0.45968038, 0.42795232, 1)
+fog_sun_scatter = 0.04
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_fj7yv")
+
+[node name="TerrainGenerator" type="Node3D" parent="."]
+script = ExtResource("1_f3sb7")
+height_noise = SubResource("FastNoiseLite_f3sb7")
+color_noise = SubResource("FastNoiseLite_fj7yv")
+grass_color_a = Color(0.35032228, 0.5577781, 0.27101433, 1)
+grass_color_b = Color(0.3155018, 0.53757966, 0.36685818, 1)
+grass_color_c = Color(0.31906912, 0.46560538, 0.21452314, 1)
+grasspatch_noise_scale = 0.15
+erosion_iterations = 75000
+erosion_shader = ExtResource("3_dwbse")
+mesh_gen_shader = ExtResource("4_pkg7o")
+ridge_noise = SubResource("FastNoiseLite_ioo17")
+continent_noise = SubResource("FastNoiseLite_ic0uy")
+river_noise = SubResource("FastNoiseLite_k3n1d")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.9063078, 0.4226183, 0, -0.4226183, 0.9063078, 128, 75, 75)
+script = ExtResource("3_aqk2v")
+
+[node name="ChunkManager" type="Node3D" parent="." node_paths=PackedStringArray("terrain_generator", "target")]
+script = ExtResource("3_tlwt5")
+terrain_generator = NodePath("../TerrainGenerator")
+target = NodePath("../Camera3D")
+render_distance = 3
+grass_mesh = ExtResource("7_gbfbk")
+grass_material = SubResource("ShaderMaterial_wse8f")
+grass_density = 9000
+grass_texture = ExtResource("9_ioo17")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_aqk2v")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+light_color = Color(0.93910354, 0.83544946, 0.55490494, 1)
+light_energy = 3.0
