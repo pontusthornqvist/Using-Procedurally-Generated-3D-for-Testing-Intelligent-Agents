@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://pwbj4fos8p62"]
+
+[ext_resource type="Script" uid="uid://cjt2ti3avciu3" path="res://qasmoke.gd" id="1_fjbyv"]
+[ext_resource type="Script" uid="uid://cmq6pt8uxnpc8" path="res://flycam.gd" id="2_rtcdx"]
+
+[sub_resource type="Environment" id="Environment_fjbyv"]
+background_mode = 1
+background_color = Color(0.4124223, 0.5933587, 0.6913566, 1)
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_fjbyv")
+
+[node name="VoxelTerrain" type="VoxelTerrain" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+script = ExtResource("2_rtcdx")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_fjbyv")
