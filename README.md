@@ -6,11 +6,12 @@ How this fits into the larger project:
 Imagine that we're essentially building a procedural "Skyrim esque" landscape. 
 We're not just building a forest - we might eventually want to add caves/dungeons and perhaps other POIs, like cabins or small villages.
 This idea presents a problem that I believe is solved by this architecture. 
-The volumetric terrain offers a deterministic approach for placing dungeons/caves inside mountains. Moreover, sing SDF booleans and Voronoi diagrams allows for "POI stamping". 
+The volumetric terrain offers a deterministic approach for placing dungeons/caves inside mountains. Moreover, using SDF booleans and Voronoi diagrams allows for "POI stamping". 
 
 The Core Challenge (The "Riverwood Problem"): We need to generate a procedural world that supports Deterministic Points of Interest (POIs).
 Scenario: We place a hand-crafted town (e.g., Riverwood) into the procedural world.
 Constraint: The town has a specific river and road layout. The procedural terrain must respect this. The terrain cannot randomly block the river or bury the road.
+  Also, The rivers and roads outside the POI need to connect to those inside of it.
 Solution: We generate a Global Graph (Voronoi/Delaunay) for roads and rivers first. We feed these curves into the C++ SDF. 
   The terrain generation subtracts density along these curves, guaranteeing a valley exists exactly where the town needs it, regardless of the random noise seed.
 
