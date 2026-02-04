@@ -12,8 +12,9 @@ The Core Challenge (The "Riverwood Problem"): We need to generate a procedural w
 Scenario: We place a hand-crafted town (e.g., Riverwood) into the procedural world.
 Constraint: The town has a specific river and road layout. The procedural terrain must respect this. The terrain cannot randomly block the river or bury the road.
   Also, The rivers and roads outside the POI need to connect to those inside of it.
-Solution: We generate a Global Graph (Voronoi/Delaunay) for roads and rivers first. We feed these curves into the C++ SDF. 
-  The terrain generation subtracts density along these curves, guaranteeing a valley exists exactly where the town needs it, regardless of the random noise seed.
+Solution: We generate a Global Graph (Voronoi/Delaunay) for POIs first. We feed this into the C++ SDF. 
+  The terrain generation subtracts density in relevant areas, guaranteeing a valley exists exactly where the town needs it, regardless of the random noise seed. 
+  Roads and rivers are generateed after POI stamping and always lead to POI endpoints.
 
 
 The Roadmap:
