@@ -1,0 +1,155 @@
+name: 🛠️ Builds
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.runner }}
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - identifier: linux-debug-x86_64
+            name: Linux Debug x86_64
+            runner: ubuntu-22.04
+            target: template_debug
+            platform: linux
+            arch: x86_64
+          - identifier: linux-release-x86_64
+            name: Linux Release x86_64
+            runner: ubuntu-22.04
+            target: template_release
+            platform: linux
+            arch: x86_64
+          - identifier: windows-debug-x86_64
+            name: Windows Debug x86_64
+            runner: ubuntu-22.04
+            target: template_debug
+            platform: windows
+            arch: x86_64
+          - identifier: windows-release-x86_64
+            name: Windows Release x86_64
+            runner: ubuntu-22.04
+            target: template_release
+            platform: windows
+            arch: x86_64
+          - identifier: android-debug-arm64v8
+            name: Android Debug arm64v8
+            runner: ubuntu-22.04
+            target: template_debug
+            platform: android
+            arch: arm64v8
+          - identifier: android-release-arm64v8
+            name: Android Release arm64v8
+            runner: ubuntu-22.04
+            target: template_release
+            platform: android
+            arch: arm64v8
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zip
+      - name: Install mingw64
+        if: ${{ startsWith(matrix.identifier, 'windows-') }}
+        run: |
+          sudo apt-get install -y mingw-w64
+          sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
+          sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
+      - name: Install JDK 17
+        if: ${{ startsWith(matrix.identifier, 'android-') }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Install Android SDK
+        if: ${{ startsWith(matrix.identifier, 'android-') }}
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK r23c
+        if: ${{ matrix.platform == 'android' }}
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r23c
+          link-to-sdk: true
+
+      - name: Install Python and SCons
+        uses: actions/setup-python@v2
+
+      - name: Install SCons
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install scons
+      - name: Set up SCons cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/.scons-cache/
+            ${{ github.workspace }}/**/.sconsign.dblite
+            ${{ github.workspace }}/godot-cpp/gen/
+          key: ${{ matrix.identifier }}-${{ github.ref }}-${{ github.sha }}
+          restore-keys: |
+            ${{ matrix.identifier }}-${{ github.ref }}-
+            ${{ matrix.identifier }}-
+      - name: Compile extension
+        shell: bash
+        env:
+          SCONS_CACHE: '${{ github.workspace }}/.scons-cache/'
+          SCONS_CACHE_LIMIT: 4096
+        run: |
+          scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' -j2
+          ls -l project/addons/*/bin/
+
+      - name: Prepare artifacts with project files
+        shell: bash
+        run: |
+          PROJECT_DIR="${{ github.workspace }}/project"
+          ARTIFACT_DIR="${{ github.workspace }}/artifacts"
+          
+          # Copy root documentation to project directory
+          cp -v "${{ github.workspace }}/README.md" "$PROJECT_DIR/"
+          cp -v "${{ github.workspace }}/LICENSE" "$PROJECT_DIR/"
+
+          # Create platform-specific zip
+          mkdir -p "$ARTIFACT_DIR"
+          ZIP_NAME="${{ matrix.identifier }}.zip"
+          cd "$PROJECT_DIR"
+          zip -r "$ARTIFACT_DIR/$ZIP_NAME" .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.identifier }}
+          path: ${{ github.workspace }}/artifacts/${{ matrix.identifier }}.zip
+
+  release:
+    runs-on: ubuntu-22.04
+    needs: build
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}  # Use existing tag from release creation
+          files: |
+            artifacts/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

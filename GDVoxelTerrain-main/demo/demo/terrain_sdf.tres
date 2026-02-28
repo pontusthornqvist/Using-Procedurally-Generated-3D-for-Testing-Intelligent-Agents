@@ -1,0 +1,44 @@
+[gd_resource type="JarTerrainSdf" load_steps=10 format=3 uid="uid://3jlwgf5biu2x"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_m15is"]
+noise_type = 2
+frequency = 0.001
+cellular_return_type = 0
+
+[sub_resource type="JarMeadowBiome" id="JarMeadowBiome_m15is"]
+
+[sub_resource type="JarForestBiome" id="JarForestBiome_b8axn"]
+
+[sub_resource type="JarMountainBiome" id="JarMountainBiome_q48e8"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_b8axn"]
+noise_type = 2
+frequency = 0.001
+cellular_return_type = 0
+
+[sub_resource type="JarRidgeMap" id="JarRidgeMap_q48e8"]
+voronoi_noise = SubResource("FastNoiseLite_b8axn")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_q48e8"]
+noise_type = 2
+frequency = 0.001
+cellular_return_type = 0
+
+[sub_resource type="JarForestMap" id="JarForestMap_qeflo"]
+voronoi_noise = SubResource("FastNoiseLite_q48e8")
+ridge_map = SubResource("JarRidgeMap_q48e8")
+random_seed = 42
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_qeflo"]
+noise_type = 2
+frequency = 0.001
+cellular_distance_function = 1
+
+[resource]
+biome_noise = SubResource("FastNoiseLite_m15is")
+shape_noise = SubResource("FastNoiseLite_qeflo")
+height_scale = 1024.0
+biomes = Array[JarBiome]([SubResource("JarMeadowBiome_m15is"), SubResource("JarForestBiome_b8axn"), SubResource("JarMountainBiome_q48e8")])
+gradient_epsilon = 1.84
+ridge_map = SubResource("JarRidgeMap_q48e8")
+forest_map = SubResource("JarForestMap_qeflo")

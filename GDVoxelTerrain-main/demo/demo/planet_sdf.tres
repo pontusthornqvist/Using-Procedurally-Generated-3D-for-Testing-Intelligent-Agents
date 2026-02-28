@@ -1,0 +1,11 @@
+[gd_resource type="JarPlanetSdf" load_steps=2 format=3 uid="uid://c0w3b174vgmm7"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_awrh7"]
+frequency = 0.001
+
+[resource]
+resource_local_to_scene = false
+resource_name = ""
+noise = SubResource("FastNoiseLite_awrh7")
+radius = 4096.0
+noise_scale = 200.0
