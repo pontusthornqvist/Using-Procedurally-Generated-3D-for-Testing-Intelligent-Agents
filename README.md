@@ -8,3 +8,10 @@ setup guide for godot-cpp (MUST DO): https://www.youtube.com/watch?v=02KJouOjQ0c
 
 
 Inspector settings:
+| Jar Voxel Terrain | Biome | Shape |
+| :---: | :---: | :---: |
+| ![JarVoxelTerrain](images/JarVoxelTerrain.png) | ![Biome](images/Biome.png) | ![Shape](images/Shape.png) |
+
+| Ridge Map | Ridge | Forest Map | Forest |
+| :---: | :---: | :---: | :---: |
+| ![RidgeMap](images/RidgeMap.png) | ![Ridge](images/Ridge.png) | ![ForestMap](images/ForestMap.png) | ![Forest](images/Forest.png) |
