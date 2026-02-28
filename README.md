@@ -5,7 +5,7 @@ Uses this plugin under MIT-license: https://github.com/JorisAR/GDVoxelTerrain
 <br> [![Watch the video](https://markdown-videos-api.jorgenkh.no/youtube/02KJouOjQ0c)](https://www.youtube.com/watch?v=02KJouOjQ0c)
 
 
-remember to run scons (the video has instructions for this).
+remember to download godot-cpp & run scons in your CLI (the video has instructions for this).
 
 
 "demo" is the actual godot project folder.
